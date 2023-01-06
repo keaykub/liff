@@ -1,0 +1,518 @@
+<?php
+require_once __DIR__ . '/vendor/autoload.php';
+date_default_timezone_set('Asia/Bangkok');
+use GuzzleHttp\Client;
+$client = new GuzzleHttp\Client();
+use LINE\LINEBot\HTTPClient\CurlHTTPClient;
+
+require 'flexmessage.php';
+require 'connectdb.php';
+define('UPLOAD_DIR', 'image/');
+$access_token = "0HfgCz6b3g79W2qIdWn14vkNyaf+FOhp1w4BYikH21rFP3RW0dQWV5AwTkJGMVuF42kpKtn+aIGOAbea0TzPDV8ji/Tn9ipwxleYtLLjHQ8OAxcTkVFHcUM6Enu84gk1X938IiCoBpIqCnYuicqhYwdB04t89/1O/w1cDnyilFU=";
+$channel_secret = '938abadbf8b56bc276baf0278ac1de8b';
+
+$httpClient = new \LINE\LINEBot\HTTPClient\CurlHTTPClient('0HfgCz6b3g79W2qIdWn14vkNyaf+FOhp1w4BYikH21rFP3RW0dQWV5AwTkJGMVuF42kpKtn+aIGOAbea0TzPDV8ji/Tn9ipwxleYtLLjHQ8OAxcTkVFHcUM6Enu84gk1X938IiCoBpIqCnYuicqhYwdB04t89/1O/w1cDnyilFU=');
+$bot = new \LINE\LINEBot($httpClient, ['channelSecret' => '938abadbf8b56bc276baf0278ac1de8b']);
+
+
+$datas = file_get_contents('php://input');
+$deCode = json_decode($datas,true);
+
+file_put_contents('logtest.txt', file_get_contents('php://input') . PHP_EOL, FILE_APPEND);
+$event = $deCode['events'][0]['type'];
+$replyToken = $deCode['events'][0]['replyToken'];
+$userId = $deCode['events'][0]['source']['userId'];
+$text = $deCode['events'][0]['message']['text'];
+$typemsg = $deCode['events'][0]['message']['type'];
+//test
+$linedata['token'] = "0HfgCz6b3g79W2qIdWn14vkNyaf+FOhp1w4BYikH21rFP3RW0dQWV5AwTkJGMVuF42kpKtn+aIGOAbea0TzPDV8ji/Tn9ipwxleYtLLjHQ8OAxcTkVFHcUM6Enu84gk1X938IiCoBpIqCnYuicqhYwdB04t89/1O/w1cDnyilFU=";
+//value check for แจ้งปัญหาการใช้งาน
+/* $checktitle = "n";
+$checkdetail = "n";
+$checkimage = "n"; */
+//end value check 
+if($event == "message"){
+    if($text == "ส่งข้อความ"){
+        $textMessageBuilder = new \LINE\LINEBot\MessageBuilder\TextMessageBuilder('hello');
+                $response = $bot->replyMessage($replyToken, $textMessageBuilder);
+                $headers = [
+                    'Content-Type' => 'application/json',
+                    'Authorization' => 'Bearer 0HfgCz6b3g79W2qIdWn14vkNyaf+FOhp1w4BYikH21rFP3RW0dQWV5AwTkJGMVuF42kpKtn+aIGOAbea0TzPDV8ji/Tn9ipwxleYtLLjHQ8OAxcTkVFHcUM6Enu84gk1X938IiCoBpIqCnYuicqhYwdB04t89/1O/w1cDnyilFU=', // Replace {YOUR_ACCESS_TOKEN} with your actual access token
+                ];
+                
+                // Set the necessary parameters for the request
+                $params = [
+                    'userId' => 'U61ed7eb5b3ced75519824b524e925cf4', // Replace {USER_ID} with the actual user ID
+                    'richMenuId' => 'richmenu-d76b3b0b522eebca5caea80d27f5fc13',//'richmenu-42807322db2a2aae712bd64a33d4d0da','richmenu-d76b3b0b522eebca5caea80d27f5fc13' // Replace {RICH_MENU_ID} with the actual rich menu ID
+                    //13 = ลงทะเบียนแล้ว
+                ];
+                
+                // Send the POST request to the LINE API
+                $response = $client->post('https://api.line.me/v2/bot/user/U61ed7eb5b3ced75519824b524e925cf4/richmenu/richmenu-d76b3b0b522eebca5caea80d27f5fc13', [
+                    'headers' => $headers,
+                    'form_params' => $params,
+                ]);
+    }else if($text == "สวัสดี"){
+        $textMessageBuilder = new \LINE\LINEBot\MessageBuilder\TextMessageBuilder($userId);
+        $responsemessage = $bot->replyMessage($replyToken, $textMessageBuilder); 
+    }else if($text == "ออกจากระบบ"){
+        $timestamp = time();
+        $logouttime = date('Y-m-d H:i:s', $timestamp);
+        $sql = "UPDATE user SET status_user='logout', logout_user='$logouttime' WHERE userid_line='$userId'";
+        if ($conn->query($sql) === TRUE) {
+            $textMessageBuilder = new \LINE\LINEBot\MessageBuilder\TextMessageBuilder('คุณได้ออกจากระบบ');
+            $response = $bot->replyMessage($replyToken, $textMessageBuilder);
+        } else {
+            $textMessageBuilder = new \LINE\LINEBot\MessageBuilder\TextMessageBuilder('เกิดข้อผิดพลาด');
+            $response = $bot->replyMessage($replyToken, $textMessageBuilder);
+        }
+        
+        $textMessageBuilder = new \LINE\LINEBot\MessageBuilder\TextMessageBuilder('คุณได้ออกจากระบบ');
+        $response = $bot->replyMessage($replyToken, $textMessageBuilder);
+        $headers = [
+            'Content-Type' => 'application/json',
+            'Authorization' => 'Bearer 0HfgCz6b3g79W2qIdWn14vkNyaf+FOhp1w4BYikH21rFP3RW0dQWV5AwTkJGMVuF42kpKtn+aIGOAbea0TzPDV8ji/Tn9ipwxleYtLLjHQ8OAxcTkVFHcUM6Enu84gk1X938IiCoBpIqCnYuicqhYwdB04t89/1O/w1cDnyilFU=', // Replace {YOUR_ACCESS_TOKEN} with your actual access token
+        ];
+                
+        // Set the necessary parameters for the request
+        $params = [
+            'userId' => $userId, // Replace {USER_ID} with the actual user ID
+            'richMenuId' => 'richmenu-3c9fc1033436da7c85938cd6e4896bf3', // Replace {RICH_MENU_ID} with the actual rich menu ID
+        ];
+               
+        // Send the POST request to the LINE API
+        $response = $client->post('https://api.line.me/v2/bot/user/'. $userId .'/richmenu/richmenu-3c9fc1033436da7c85938cd6e4896bf3', [
+            'headers' => $headers,
+            'form_params' => $params,
+        ]);
+        
+    }else if($text == "ฝึกอบรม"){
+        $textMessageBuilder = new \LINE\LINEBot\MessageBuilder\TextMessageBuilder('ฝึกอบรม');
+        $response = $bot->replyMessage($replyToken, $textMessageBuilder);
+        
+    }else if($text == "แจ้งปัญหาการใช้งาน"){
+        $sql = "SELECT userid_line FROM user WHERE userid_line= ? AND status_user = 'login'";
+            $stmt = $conn->prepare($sql);
+            $stmt->bind_param('s', $userId);
+            $stmt->execute();
+            $result = $stmt->get_result();
+            if ($result->num_rows > 0) {
+                $stmt = $conn->prepare("SELECT inform_title, inform_detail FROM inform WHERE inform_status='ok'");
+                $stmt->execute(); 
+                $result = $stmt->get_result();
+                $numrow = $result->num_rows;
+                $datatitle = array();
+                $datadetail = array();
+                while($row = $result->fetch_assoc()) {
+                    $datatitle[] = $row['inform_title'];
+                    $datadetail[] = $row['inform_detail'];
+                }
+                $i = 1;
+                $datas = []; 
+                $datas["type"] = "flex";
+                $datas["altText"] = "This is a Flex Message";
+                $datas["contents"]["type"] = "carousel";
+                while($i <= $numrow){
+                        $datas["contents"]["contents"][$i - 1]["type"] = "bubble";
+                        $datas["contents"]["contents"][$i - 1]["hero"]["type"] = "image";
+                        $datas["contents"]["contents"][$i - 1]["hero"]["url"] = "https://img.freepik.com/free-vector/illustration-characters-fixing-cogwheel_53876-40796.jpg";
+                        $datas["contents"]["contents"][$i - 1]["hero"]["size"] = "full";
+                        $datas["contents"]["contents"][$i - 1]["hero"]["aspectRatio"] = "20:13";
+                        $datas["contents"]["contents"][$i - 1]["hero"]["aspectMode"] = "fit";
+                        $datas["contents"]["contents"][$i - 1]["body"]["type"] = "box";
+                        $datas["contents"]["contents"][$i - 1]["body"]["layout"] = "vertical";
+                        $datas["contents"]["contents"][$i - 1]["body"]["spacing"] = "sm";
+                        $datas["contents"]["contents"][$i - 1]["body"]["contents"][0]["type"] = "text";
+                        $datas["contents"]["contents"][$i - 1]["body"]["contents"][0]["text"] = $datatitle[$i-1];
+                        $datas["contents"]["contents"][$i - 1]["body"]["contents"][0]["weight"] = "bold";
+                        $datas["contents"]["contents"][$i - 1]["body"]["contents"][0]["size"] = "xl";
+                        $datas["contents"]["contents"][$i - 1]["body"]["contents"][0]["align"] = "center";
+                        $datas["contents"]["contents"][$i - 1]["body"]["contents"][0]["wrap"] = true;
+                        $datas["contents"]["contents"][$i - 1]["body"]["contents"][1]["type"] = "box";
+                        $datas["contents"]["contents"][$i - 1]["body"]["contents"][1]["layout"] = "horizontal";
+                        $datas["contents"]["contents"][$i - 1]["body"]["contents"][1]["width"] = "300px";
+                        $datas["contents"]["contents"][$i - 1]["body"]["contents"][1]["height"] = "70px";
+                        $datas["contents"]["contents"][$i - 1]["body"]["contents"][1]["contents"][0]["type"] = "text";
+                        $datas["contents"]["contents"][$i - 1]["body"]["contents"][1]["contents"][0]["text"] = $datadetail[$i-1];
+                        $datas["contents"]["contents"][$i - 1]["body"]["contents"][1]["contents"][0]["wrap"] = true;
+                        $datas["contents"]["contents"][$i - 1]["footer"]["type"] = "box";
+                        $datas["contents"]["contents"][$i - 1]["footer"]["layout"] = "vertical";
+                        $datas["contents"]["contents"][$i - 1]["footer"]["spacing"] = "sm";
+                        $datas["contents"]["contents"][$i - 1]["footer"]["contents"][0]["type"] = "button";
+                        $datas["contents"]["contents"][$i - 1]["footer"]["contents"][0]["action"]["type"] = "message";
+                        $datas["contents"]["contents"][$i - 1]["footer"]["contents"][0]["action"]["label"] = "คลิ๊ก!!";
+                        $datas["contents"]["contents"][$i - 1]["footer"]["contents"][0]["action"]["text"] = $datatitle[$i-1];
+                        $datas["contents"]["contents"][$i - 1]["footer"]["contents"][0]["color"] = "#447C3EFF";
+                        $datas["contents"]["contents"][$i - 1]["footer"]["contents"][0]["style"] = "primary";
+                    
+                    $i++;
+                }
+                $dataPushMessages['url'] = "https://api.line.me/v2/bot/message/reply";
+                $dataPushMessages['token'] = "0HfgCz6b3g79W2qIdWn14vkNyaf+FOhp1w4BYikH21rFP3RW0dQWV5AwTkJGMVuF42kpKtn+aIGOAbea0TzPDV8ji/Tn9ipwxleYtLLjHQ8OAxcTkVFHcUM6Enu84gk1X938IiCoBpIqCnYuicqhYwdB04t89/1O/w1cDnyilFU=";
+                $messages['replyToken'] = $replyToken;
+                $messages['messages'][] = $datas;
+                $encodeJson = json_encode($messages);
+
+                sentMessage($encodeJson,$dataPushMessages); 
+            
+            }else{
+                $datas = [];
+                $datas["type"] = "imagemap";
+                $datas["altText"] = "This is a Flex Message";
+                $datas["baseUrl"] = "https://ex10.tech/store/v1/public/content/upload/imagemap/e3fc69eb-3bf2-4bf8-960d-81be40861fea";
+                $datas["altText"] = "Imagemap generator By EX10";
+                $datas["baseSize"]["width"] = 1040;
+                $datas["baseSize"]["height"] = 702;
+                $datas["actions"][0]["type"] = "uri";
+                $datas["actions"][0]["area"]["x"] = 277;
+                $datas["actions"][0]["area"]["y"] = 197;
+                $datas["actions"][0]["area"]["width"] = 516;
+                $datas["actions"][0]["area"]["height"] = 345;
+                $datas["actions"][0]["linkUri"] = "https://liff.line.me/1657775278-QPBYxKkk";
+
+                $dataPushMessages['url'] = "https://api.line.me/v2/bot/message/reply";
+                $dataPushMessages['token'] = "0HfgCz6b3g79W2qIdWn14vkNyaf+FOhp1w4BYikH21rFP3RW0dQWV5AwTkJGMVuF42kpKtn+aIGOAbea0TzPDV8ji/Tn9ipwxleYtLLjHQ8OAxcTkVFHcUM6Enu84gk1X938IiCoBpIqCnYuicqhYwdB04t89/1O/w1cDnyilFU=";
+                $messages['replyToken'] = $replyToken;
+                $messages['messages'][] = $datas;
+                $encodeJson = json_encode($messages);
+                
+                sentImagemap($encodeJson,$dataPushMessages);
+            }
+    }else if( $text == "คุยitclinic"){
+        $sql = "SELECT userid_line FROM user WHERE userid_line= ? AND status_user = 'login'";
+            $stmt = $conn->prepare($sql);
+            $stmt->bind_param('s', $userId);
+            $stmt->execute();
+            $result = $stmt->get_result();
+            if ($result->num_rows > 0) {
+                $textMessageBuilder = new \LINE\LINEBot\MessageBuilder\TextMessageBuilder('ใช้งานได้ครับ');
+                $response = $bot->replyMessage($replyToken, $textMessageBuilder);
+            }else{
+                $datas = [];
+                $datas["type"] = "imagemap";
+                $datas["altText"] = "This is a Flex Message";
+                $datas["baseUrl"] = "https://ex10.tech/store/v1/public/content/upload/imagemap/e3fc69eb-3bf2-4bf8-960d-81be40861fea";
+                $datas["altText"] = "Imagemap generator By EX10";
+                $datas["baseSize"]["width"] = 1040;
+                $datas["baseSize"]["height"] = 702;
+                $datas["actions"][0]["type"] = "uri";
+                $datas["actions"][0]["area"]["x"] = 277;
+                $datas["actions"][0]["area"]["y"] = 197;
+                $datas["actions"][0]["area"]["width"] = 516;
+                $datas["actions"][0]["area"]["height"] = 345;
+                $datas["actions"][0]["linkUri"] = "https://liff.line.me/1657775278-QPBYxKkk";
+                
+                $dataPushMessages['url'] = "https://api.line.me/v2/bot/message/reply";
+                $dataPushMessages['token'] = "0HfgCz6b3g79W2qIdWn14vkNyaf+FOhp1w4BYikH21rFP3RW0dQWV5AwTkJGMVuF42kpKtn+aIGOAbea0TzPDV8ji/Tn9ipwxleYtLLjHQ8OAxcTkVFHcUM6Enu84gk1X938IiCoBpIqCnYuicqhYwdB04t89/1O/w1cDnyilFU=";
+                $messages['replyToken'] = $replyToken;
+                $messages['messages'][] = $datas;
+                $encodeJson = json_encode($messages);
+                
+                sentImagemap($encodeJson,$dataPushMessages);
+            }
+    }else if($text == "สอบถามรายละเอียด"){
+        $datas = [];
+        $datas["type"] = "flex";
+        $datas["altText"] = "This is a Flex Message";
+        $datas["contents"]["type"] = "carousel";
+        $datas["contents"]["contents"][0]["type"] = "bubble";
+        $datas["contents"]["contents"][0]["hero"]["type"] = "image";
+        $datas["contents"]["contents"][0]["hero"]["url"] = "https://cdn-icons-png.flaticon.com/512/282/282100.png";
+        $datas["contents"]["contents"][0]["hero"]["size"] = "full";
+        $datas["contents"]["contents"][0]["hero"]["aspectRatio"] = "20:13";
+        $datas["contents"]["contents"][0]["hero"]["aspectMode"] = "fit";
+        $datas["contents"]["contents"][0]["body"]["type"] = "box";
+        $datas["contents"]["contents"][0]["body"]["layout"] = "vertical";
+        $datas["contents"]["contents"][0]["body"]["spacing"] = "sm";
+        $datas["contents"]["contents"][0]["body"]["contents"][0]["type"] = "text";
+        $datas["contents"]["contents"][0]["body"]["contents"][0]["text"] = "ลิงค์เว็บไซต์ทั้งหมด";
+        $datas["contents"]["contents"][0]["body"]["contents"][0]["weight"] = "bold";
+        $datas["contents"]["contents"][0]["body"]["contents"][0]["size"] = "xxl";
+        $datas["contents"]["contents"][0]["body"]["contents"][0]["wrap"] = true;
+        $datas["contents"]["contents"][0]["body"]["contents"][1]["type"] = "box";
+        $datas["contents"]["contents"][0]["body"]["contents"][1]["layout"] = "baseline";
+        $datas["contents"]["contents"][0]["body"]["contents"][1]["contents"][0]["type"] = "text";
+        $datas["contents"]["contents"][0]["body"]["contents"][1]["contents"][0]["text"] = "ลิงค์เว็บไซต์ทั้งหมดของมหาวิทยาลัย";
+        $datas["contents"]["contents"][0]["body"]["contents"][1]["contents"][0]["weight"] = "regular";
+        $datas["contents"]["contents"][0]["body"]["contents"][1]["contents"][0]["size"] = "sm";
+        $datas["contents"]["contents"][0]["body"]["contents"][1]["contents"][0]["flex"] = 0;
+        $datas["contents"]["contents"][0]["body"]["contents"][1]["contents"][0]["wrap"] = true;
+        $datas["contents"]["contents"][0]["footer"]["type"] = "box";
+        $datas["contents"]["contents"][0]["footer"]["layout"] = "vertical";
+        $datas["contents"]["contents"][0]["footer"]["spacing"] = "sm";
+        $datas["contents"]["contents"][0]["footer"]["contents"][0]["type"] = "button";
+        $datas["contents"]["contents"][0]["footer"]["contents"][0]["action"]["type"] = "message";
+        $datas["contents"]["contents"][0]["footer"]["contents"][0]["action"]["label"] = "คลิ๊ก!!";
+        $datas["contents"]["contents"][0]["footer"]["contents"][0]["action"]["text"] = "ลิงค์เว็บไซต์ทั้งหมด";
+        $datas["contents"]["contents"][0]["footer"]["contents"][0]["style"] = "primary";
+        $datas["contents"]["contents"][1]["type"] = "bubble";
+        $datas["contents"]["contents"][1]["hero"]["type"] = "image";
+        $datas["contents"]["contents"][1]["hero"]["url"] = "https://cdn-icons-png.flaticon.com/512/7509/7509177.png";
+        $datas["contents"]["contents"][1]["hero"]["size"] = "full";
+        $datas["contents"]["contents"][1]["hero"]["aspectRatio"] = "20:13";
+        $datas["contents"]["contents"][1]["hero"]["aspectMode"] = "fit";
+        $datas["contents"]["contents"][1]["body"]["type"] = "box";
+        $datas["contents"]["contents"][1]["body"]["layout"] = "vertical";
+        $datas["contents"]["contents"][1]["body"]["spacing"] = "sm";
+        $datas["contents"]["contents"][1]["body"]["contents"][0]["type"] = "text";
+        $datas["contents"]["contents"][1]["body"]["contents"][0]["text"] = "ที่ตั้งคณะต่างๆ";
+        $datas["contents"]["contents"][1]["body"]["contents"][0]["weight"] = "bold";
+        $datas["contents"]["contents"][1]["body"]["contents"][0]["size"] = "xxl";
+        $datas["contents"]["contents"][1]["body"]["contents"][0]["wrap"] = true;
+        $datas["contents"]["contents"][1]["body"]["contents"][1]["type"] = "box";
+        $datas["contents"]["contents"][1]["body"]["contents"][1]["layout"] = "baseline";
+        $datas["contents"]["contents"][1]["body"]["contents"][1]["contents"][0]["type"] = "text";
+        $datas["contents"]["contents"][1]["body"]["contents"][1]["contents"][0]["text"] = "ที่ตั้งคณะต่างๆของมหาวิทยาลัย";
+        $datas["contents"]["contents"][1]["body"]["contents"][1]["contents"][0]["weight"] = "regular";
+        $datas["contents"]["contents"][1]["body"]["contents"][1]["contents"][0]["size"] = "sm";
+        $datas["contents"]["contents"][1]["body"]["contents"][1]["contents"][0]["flex"] = 0;
+        $datas["contents"]["contents"][1]["body"]["contents"][1]["contents"][0]["wrap"] = true;
+        $datas["contents"]["contents"][1]["footer"]["type"] = "box";
+        $datas["contents"]["contents"][1]["footer"]["layout"] = "vertical";
+        $datas["contents"]["contents"][1]["footer"]["spacing"] = "sm";
+        $datas["contents"]["contents"][1]["footer"]["contents"][0]["type"] = "button";
+        $datas["contents"]["contents"][1]["footer"]["contents"][0]["action"]["type"] = "message";
+        $datas["contents"]["contents"][1]["footer"]["contents"][0]["action"]["label"] = "คลิ๊ก!!";
+        $datas["contents"]["contents"][1]["footer"]["contents"][0]["action"]["text"] = "ที่ตั้งคณะต่างๆ";
+        $datas["contents"]["contents"][1]["footer"]["contents"][0]["color"] = "#9E8282FF";
+        $datas["contents"]["contents"][1]["footer"]["contents"][0]["style"] = "primary";
+        $datas["contents"]["contents"][2]["type"] = "bubble";
+        $datas["contents"]["contents"][2]["hero"]["type"] = "image";
+        $datas["contents"]["contents"][2]["hero"]["url"] = "https://cdn-icons-png.flaticon.com/512/5184/5184592.png";
+        $datas["contents"]["contents"][2]["hero"]["size"] = "full";
+        $datas["contents"]["contents"][2]["hero"]["aspectRatio"] = "20:13";
+        $datas["contents"]["contents"][2]["hero"]["aspectMode"] = "fit";
+        $datas["contents"]["contents"][2]["body"]["type"] = "box";
+        $datas["contents"]["contents"][2]["body"]["layout"] = "vertical";
+        $datas["contents"]["contents"][2]["body"]["spacing"] = "sm";
+        $datas["contents"]["contents"][2]["body"]["contents"][0]["type"] = "text";
+        $datas["contents"]["contents"][2]["body"]["contents"][0]["text"] = "ข้อสงสัย";
+        $datas["contents"]["contents"][2]["body"]["contents"][0]["weight"] = "bold";
+        $datas["contents"]["contents"][2]["body"]["contents"][0]["size"] = "xxl";
+        $datas["contents"]["contents"][2]["body"]["contents"][0]["wrap"] = true;
+        $datas["contents"]["contents"][2]["body"]["contents"][1]["type"] = "box";
+        $datas["contents"]["contents"][2]["body"]["contents"][1]["layout"] = "baseline";
+        $datas["contents"]["contents"][2]["body"]["contents"][1]["contents"][0]["type"] = "text";
+        $datas["contents"]["contents"][2]["body"]["contents"][1]["contents"][0]["text"] = "ข้อสงสัยที่พบเจอได้บ่อย";
+        $datas["contents"]["contents"][2]["body"]["contents"][1]["contents"][0]["weight"] = "regular";
+        $datas["contents"]["contents"][2]["body"]["contents"][1]["contents"][0]["size"] = "sm";
+        $datas["contents"]["contents"][2]["body"]["contents"][1]["contents"][0]["flex"] = 0;
+        $datas["contents"]["contents"][2]["body"]["contents"][1]["contents"][0]["wrap"] = true;
+        $datas["contents"]["contents"][2]["footer"]["type"] = "box";
+        $datas["contents"]["contents"][2]["footer"]["layout"] = "vertical";
+        $datas["contents"]["contents"][2]["footer"]["spacing"] = "sm";
+        $datas["contents"]["contents"][2]["footer"]["contents"][0]["type"] = "button";
+        $datas["contents"]["contents"][2]["footer"]["contents"][0]["action"]["type"] = "message";
+        $datas["contents"]["contents"][2]["footer"]["contents"][0]["action"]["label"] = "คลิ๊ก!!";
+        $datas["contents"]["contents"][2]["footer"]["contents"][0]["action"]["text"] = "ข้อสงสัยที่พบบ่อย";
+        $datas["contents"]["contents"][2]["footer"]["contents"][0]["color"] = "#743838FF";
+        $datas["contents"]["contents"][2]["footer"]["contents"][0]["style"] = "primary";
+        
+        $dataPushMessages['url'] = "https://api.line.me/v2/bot/message/reply";
+        $dataPushMessages['token'] = "0HfgCz6b3g79W2qIdWn14vkNyaf+FOhp1w4BYikH21rFP3RW0dQWV5AwTkJGMVuF42kpKtn+aIGOAbea0TzPDV8ji/Tn9ipwxleYtLLjHQ8OAxcTkVFHcUM6Enu84gk1X938IiCoBpIqCnYuicqhYwdB04t89/1O/w1cDnyilFU=";
+        $messages['replyToken'] = $replyToken;
+        $messages['messages'][] = $datas;
+        $encodeJson = json_encode($messages);
+        sentImagemap($encodeJson,$dataPushMessages);
+    }else if($text == "ลิงค์เว็บไซต์ทั้งหมด"){
+        $sql = "SELECT name_link, linkweb FROM linkwebsite WHERE question= 'ลิงค์เว็บไซต์ทั้งหมด' AND status='ok'";
+        $result = $conn->query($sql);
+        if($result->num_rows > 0){
+            $datalinkweb = array();
+            while($row = $result->fetch_assoc()) {
+            $datalinkweb[] = $row['name_link'];
+            $datalinkweb[] = $row['linkweb'];
+            }
+            $datashow = implode(PHP_EOL, $datalinkweb);
+            $datas = array();
+            $datas["type"] = "text";
+            $datas["text"] = "$datashow\n";
+            $dataPushMessages['url'] = "https://api.line.me/v2/bot/message/reply";
+            $dataPushMessages['token'] = "0HfgCz6b3g79W2qIdWn14vkNyaf+FOhp1w4BYikH21rFP3RW0dQWV5AwTkJGMVuF42kpKtn+aIGOAbea0TzPDV8ji/Tn9ipwxleYtLLjHQ8OAxcTkVFHcUM6Enu84gk1X938IiCoBpIqCnYuicqhYwdB04t89/1O/w1cDnyilFU=";
+            $messages['replyToken'] = $replyToken;
+            $messages['messages'][] = $datas;
+            $encodeJson = json_encode($messages);
+            sentImagemap($encodeJson,$dataPushMessages); 
+        }else{
+            $datas = [];
+            $datas["type"] = "text";
+            $datas["text"] = "หาไม่เจออะ";
+            $dataPushMessages['url'] = "https://api.line.me/v2/bot/message/reply";
+            $dataPushMessages['token'] = "0HfgCz6b3g79W2qIdWn14vkNyaf+FOhp1w4BYikH21rFP3RW0dQWV5AwTkJGMVuF42kpKtn+aIGOAbea0TzPDV8ji/Tn9ipwxleYtLLjHQ8OAxcTkVFHcUM6Enu84gk1X938IiCoBpIqCnYuicqhYwdB04t89/1O/w1cDnyilFU=";
+            $messages['replyToken'] = $replyToken;
+            $messages['messages'][] = $datas;
+            $encodeJson = json_encode($messages);
+            sentImagemap($encodeJson,$dataPushMessages);
+        }
+    }else if (preg_match('/^ปัญหาระบบ/', $text)) {
+        $stmt = $conn->prepare("SELECT check_status FROM checkinform WHERE userid= '$userId' AND check_status = 'ok'");
+        $stmt->execute(); 
+        $result = $stmt->get_result();
+        $numrow = $result->num_rows;
+        $datauserid = array();
+        $datachecktitle = array();
+        $datacheckstatus = array();
+        while($row = $result->fetch_assoc()) {
+            $datacheckstatus[] = $row['check_status'];
+        }
+        if($datacheckstatus[0] == "ok"){
+            $textMessageBuilder = new \LINE\LINEBot\MessageBuilder\TextMessageBuilder("ท่านมีข้อมูลเก่าที่ทำค้างไว้อยู่");
+            $response = $bot->replyMessage($replyToken, $textMessageBuilder);
+        }else{
+            $sql = "INSERT INTO checkinform (userid, checktitle, title, check_detail, check_image, check_status)
+            VALUES ('$userId','ok','$text','ok','','ok')";
+            if($conn->query($sql) === TRUE){
+                $messageshow = 'รบกวนพิมพ์รายละเอียดของ'.$text;
+                $textMessageBuilder = new \LINE\LINEBot\MessageBuilder\TextMessageBuilder($messageshow);
+                $response = $bot->replyMessage($replyToken, $textMessageBuilder);
+            }
+        }
+    }else if($text == "มีรูปภาพเพิ่มเติม"){
+        $sql = "UPDATE checkinform SET check_image='ok', checktitle = 'success' WHERE userid='$userId'";
+        if($conn->query($sql) === TRUE){
+            $textMessageBuilder = new \LINE\LINEBot\MessageBuilder\TextMessageBuilder('รบกวนเพิ่มรูปภาพได้เลยครับ(สูงสุด 4 รูปภาพ)');
+            $response = $bot->replyMessage($replyToken, $textMessageBuilder);
+        }
+    }else {
+        $stmt = $conn->prepare("SELECT userid, checktitle, check_detail, check_image, check_status FROM checkinform WHERE userid= '$userId' AND check_status = 'ok'");
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $numrow = $result->num_rows;
+        $datauserid = array();
+        $datachecktitle = array();
+        $datacheckstatus = array();
+        while($row = $result->fetch_assoc()) {
+            $datauserid[] = $row['userid'];
+            $datachecktitle[] = $row['checktitle'];
+            $datacheckstatus[] = $row['check_status'];
+            $datacheckimage[] = $row['check_image'];
+            $datacheckdetail[] = $row['check_detail'];
+        }
+        if($datacheckdetail[0] == "ok"){
+            $sql = "UPDATE checkinform SET detail='$text', check_detail= 'success' WHERE userid='$userId'";
+            if($conn->query($sql) === TRUE){
+                if($datauserid[0] == $userId && $datachecktitle[0] == "ok"  && $datacheckstatus[0] == "ok" ){
+                    $datas = [];
+                    $datas["type"] = "flex";
+                    $datas["altText"] = "This is a Flex Message";
+                    $datas["contents"]["type"] = "bubble";
+                    $datas["contents"]["hero"]["type"] = "image";
+                    $datas["contents"]["hero"]["url"] = "https://media.istockphoto.com/id/1344687455/vector/question-sing-flat-icon-vector-illustration-isolated-on-white-background.jpg?s=612x612&w=0&k=20&c=ZU6kq0hQacI7mZoYuXTqXF8KsgNnbCRaxDm_nAIdCAw=";
+                    $datas["contents"]["hero"]["size"] = "full";
+                    $datas["contents"]["hero"]["aspectRatio"] = "20:13";
+                    $datas["contents"]["hero"]["aspectMode"] = "fit";
+                    $datas["contents"]["hero"]["action"]["type"] = "uri";
+                    $datas["contents"]["hero"]["action"]["label"] = "Line";
+                    $datas["contents"]["hero"]["action"]["uri"] = "https://linecorp.com/";
+                    $datas["contents"]["body"]["type"] = "box";
+                    $datas["contents"]["body"]["layout"] = "vertical";
+                    $datas["contents"]["body"]["contents"][0]["type"] = "text";
+                    $datas["contents"]["body"]["contents"][0]["text"] = "ต้องการแนบรูปภาพหรือไม่?";
+                    $datas["contents"]["body"]["contents"][0]["weight"] = "bold";
+                    $datas["contents"]["body"]["contents"][0]["size"] = "lg";
+                    $datas["contents"]["body"]["contents"][0]["color"] = "#131316FF";
+                    $datas["contents"]["footer"]["type"] = "box";
+                    $datas["contents"]["footer"]["layout"] = "horizontal";
+                    $datas["contents"]["footer"]["flex"] = 0;
+                    $datas["contents"]["footer"]["spacing"] = "sm";
+                    $datas["contents"]["footer"]["contents"][0]["type"] = "spacer";
+                    $datas["contents"]["footer"]["contents"][0]["size"] = "sm";
+                    $datas["contents"]["footer"]["contents"][1]["type"] = "box";
+                    $datas["contents"]["footer"]["contents"][1]["layout"] = "vertical";
+                    $datas["contents"]["footer"]["contents"][1]["contents"][0]["type"] = "button";
+                    $datas["contents"]["footer"]["contents"][1]["contents"][0]["action"]["type"] = "message";
+                    $datas["contents"]["footer"]["contents"][1]["contents"][0]["action"]["label"] = "แนบรูปภาพ";
+                    $datas["contents"]["footer"]["contents"][1]["contents"][0]["action"]["text"] = "มีรูปภาพเพิ่มเติม";
+                    $datas["contents"]["footer"]["contents"][1]["contents"][0]["color"] = "#C8AAF1FF";
+                    $datas["contents"]["footer"]["contents"][1]["contents"][0]["style"] = "secondary";
+                    $datas["contents"]["footer"]["contents"][2]["type"] = "box";
+                    $datas["contents"]["footer"]["contents"][2]["layout"] = "vertical";
+                    $datas["contents"]["footer"]["contents"][2]["contents"][0]["type"] = "button";
+                    $datas["contents"]["footer"]["contents"][2]["contents"][0]["action"]["type"] = "message";
+                    $datas["contents"]["footer"]["contents"][2]["contents"][0]["action"]["label"] = "ไม่แนบรูปภาพ";
+                    $datas["contents"]["footer"]["contents"][2]["contents"][0]["action"]["text"] = "ไม่มีรูปภาพเพิ่มเติม";
+                    $datas["contents"]["footer"]["contents"][2]["contents"][0]["color"] = "#F0DBD0FF";
+                    $datas["contents"]["footer"]["contents"][2]["contents"][0]["style"] = "secondary";
+                    
+                    $dataPushMessages['url'] = "https://api.line.me/v2/bot/message/reply";
+                    $dataPushMessages['token'] = "0HfgCz6b3g79W2qIdWn14vkNyaf+FOhp1w4BYikH21rFP3RW0dQWV5AwTkJGMVuF42kpKtn+aIGOAbea0TzPDV8ji/Tn9ipwxleYtLLjHQ8OAxcTkVFHcUM6Enu84gk1X938IiCoBpIqCnYuicqhYwdB04t89/1O/w1cDnyilFU=";
+                    $messages['replyToken'] = $replyToken;
+                    $messages['messages'][] = $datas;
+                    $encodeJson = json_encode($messages);
+                    
+                    sentMessage($encodeJson,$dataPushMessages);
+                }
+            }
+        }else if($datauserid[0] == $userId && $datachecktitle[0] == "success" && $datacheckdetail[0] == "success" && $datacheckstatus[0] == "ok" && $datacheckimage[0] == "ok"){
+            if($typemsg == "image"){
+
+                foreach ($deCode['events'] as $event) {
+                    if ($event['type'] == 'message') {
+                        if($event['message']['type'] == "image"){
+        
+                            $linedata['messageId'] = $deCode['events'][0]['message']['id'];  //ยังไม่เจอปัญหา
+                            $results = getContent($linedata);
+                            if($results['result'] == 'S'){
+                                $idpic = $event['message']['imageSet']['id'];
+                                $indexpic = $event['message']['imageSet']['index'];
+                                $nummberpic = $event['message']['imageSet']['total'];
+                                $nummberpic = intval($nummberpic);
+                                $indexpic = intval($indexpic);
+                                
+                                $botDataUserFolder = UPLOAD_DIR.$userId; // มีโฟลเดอร์ด้านในเป็น userId อีกขั้น
+                                if(!file_exists($botDataUserFolder)) { // ตรวจสอบถ้ายังไม่มีให้สร้างโฟลเดอร์ userId
+                                    mkdir($botDataUserFolder, 0777, true);
+                                } 
+                                $random = uniqid();
+                                $files = $random .'_'.$userId. '.jpg';
+                                $file = $botDataUserFolder.'/'. $random .'_'.$userId. '.jpg';
+                                $success = file_put_contents($file, $results['response']);
+                                $stmt = $conn->prepare("SELECT image FROM checkinform WHERE userid= '$userId'");
+                                $stmt->execute();
+                                $result = $stmt->get_result();
+                                $numrow = $result->num_rows;
+                                $datauserid = array();
+                                $datachecktitle = array();
+                                $datacheckstatus = array();
+                                while($row = $result->fetch_assoc()) {
+                                    $dataimage[] = $row['image'];
+                                }
+                                if (!empty($dataimage[0])){
+                                    
+                                }
+                                $sql = "UPDATE checkinform SET image='$files' WHERE userid='$userId'";  //กำลังปรับ
+                                if($conn->query($sql) === TRUE){
+                                    if($nummberpic > 4){ 
+                                        if($indexpic == 4){
+                                            $textMessageBuilder = new \LINE\LINEBot\MessageBuilder\TextMessageBuilder("รบกวนเพิ่มรูปภาพใหม่(สูงสุด 4 รูปภาพ)");
+                                            $response = $bot->replyMessage($replyToken, $textMessageBuilder);
+                                        }
+                                    }else if($nummberpic <=4){
+                                        if($indexpic == $nummberpic){
+                                            $textMessageBuilder = new \LINE\LINEBot\MessageBuilder\TextMessageBuilder("สำเร็จครับ");
+                                            $response = $bot->replyMessage($replyToken, $textMessageBuilder);
+                                        }
+                                    }
+                                }
+                                
+                            }
+
+                        }
+                    }
+                }
+            }else{ 
+                $textMessageBuilder = new \LINE\LINEBot\MessageBuilder\TextMessageBuilder('รบกวนแนบรูปภาพเท่านั้นนะคะ');
+                $response = $bot->replyMessage($replyToken, $textMessageBuilder); 
+            }
+        }else{
+            $textMessageBuilder = new \LINE\LINEBot\MessageBuilder\TextMessageBuilder('ฉันไม่เข้าใจค่ะ');
+            $response = $bot->replyMessage($replyToken, $textMessageBuilder);
+        }
+    }
+}else if($event == "follow"){
+    $textMessageBuilder = new \LINE\LINEBot\MessageBuilder\TextMessageBuilder('ยินดีต้อนรับนะครับ');
+    $response = $bot->replyMessage($replyToken, $textMessageBuilder);
+}
+
+
+?>
